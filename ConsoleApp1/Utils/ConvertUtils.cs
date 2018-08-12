@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Data;
+using Oracle.DataAccess.Client;
+using ConsoleApp.Base;
 
 namespace ConsoleApp.Utils
 {
@@ -17,6 +20,38 @@ namespace ConsoleApp.Utils
             else if (type == typeof(double))
             {
                 return Double.Parse(val.ToString());
+            }
+            else
+            {
+                throw new NotSupportedException("Unsupport type.");
+            }
+        }
+
+        public static OracleDbType Convert(Type type)
+        {
+            if (type == typeof(string))
+            {
+                return OracleDbType.Varchar2;
+            }
+            else if (type == typeof(int))
+            {
+                return OracleDbType.Int32;
+            }
+            else
+            {
+                throw new NotSupportedException("Unsupport type.");
+            }
+        }
+
+        public static ParameterDirection Convert(Direction direction)
+        {
+            if (direction == Direction.Input)
+            {
+                return ParameterDirection.Input;
+            }
+            else if (direction == Direction.Output)
+            {
+                return ParameterDirection.Output;
             }
             else
             {

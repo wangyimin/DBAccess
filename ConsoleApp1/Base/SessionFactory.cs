@@ -4,12 +4,18 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
+using Oracle.DataAccess.Client;
+using ConsoleApp.Utils;
 
 namespace ConsoleApp.Base
 {
     public class SessionFactory : IDisposable
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(SessionFactory));
+
+        private static readonly string PROC_RET_CD = "r";
+        private static readonly string PROC_RET_MSG = "msg";
+
 
         private ConnectionStatus _status;
         private DbConnection _connection;
@@ -60,6 +66,51 @@ namespace ConsoleApp.Base
             return dt;
         }
 
+        public virtual void CreateStoredProcedure(string proc, bool IsFunction, params ParameterInfo[] para)
+        {
+            logger.Debug(proc);
+
+            OracleCommand cmd = (OracleCommand)_command;
+
+            cmd.CommandText = proc;
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            if (IsFunction)
+            {
+                cmd.Parameters.Add(new OracleParameter(PROC_RET_CD, OracleDbType.Int32)).Direction = ParameterDirection.ReturnValue;
+            }
+
+            foreach (ParameterInfo obj in para)
+            {
+                if (obj.Direction == Direction.Input)
+                {
+                    cmd.Parameters.Add(obj.Name, obj.Value);
+                }
+                else
+                {
+                    cmd.Parameters.Add(obj.Name, ConvertUtils.Convert(obj.DataType), ConvertUtils.Convert(obj.Direction));
+
+                }
+            }
+
+            if (!IsFunction)
+            {
+                cmd.Parameters.Add(new OracleParameter(PROC_RET_CD, OracleDbType.Int32)).Direction = ParameterDirection.Output;
+            }
+
+            cmd.Parameters.Add(new OracleParameter(PROC_RET_MSG, ConvertUtils.Convert(typeof(string)), 256)).Direction = ParameterDirection.Output;
+
+            cmd.ExecuteNonQuery();
+
+            string r = cmd.Parameters[PROC_RET_CD].Value.ToString();
+            
+            if (!"0".Equals(r))
+            {
+                throw new InvalidProgramException("Error [" + cmd.Parameters[PROC_RET_MSG].Value.ToString() + "] occurred in calling stored procedure.");
+            }
+            
+        }
+
         public virtual List<T> CreateQuery<T>(string sql)
         {
             DataTable dt = CreateQuery(sql);
@@ -82,6 +133,7 @@ namespace ConsoleApp.Base
             return lst;
         }
  
+
         public virtual int CreateDDL(string sql)
         {
             _command.CommandText = sql;
@@ -113,6 +165,7 @@ namespace ConsoleApp.Base
             if (_borrowed)
             {
                 ConnectionFactory.PutConnection(_status);
+                _borrowed = false;
             }
         } 
 

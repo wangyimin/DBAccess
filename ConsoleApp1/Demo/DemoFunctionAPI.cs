@@ -12,8 +12,11 @@ namespace ConsoleApp.Demo
             using (SessionFactory sf = new SessionFactory())
             {
                 sf.BeginTransaction();
-
+                
                 DataTable dt = sf.CreateQuery("SELECT * FROM TEST WHERE NAME = '" + para.Value + "'");
+                
+                ParameterInfo[] pi = { new ParameterInfo("Name", "W01", typeof(string), Direction.Input) };
+                sf.CreateStoredProcedure("testfunc", true, pi);
 
                 sf.Commit();
 

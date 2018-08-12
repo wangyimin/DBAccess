@@ -8,7 +8,7 @@ namespace ConsoleApp.Base
     {
         private const string ORALCE_FACTORY_PARAM = "Oracle.DataAccess.Client";
         private const string ORACLE_CONNECTION_STRING =
-            "User Id=test;Password=test;" +
+            "User Id=test;Password=wym509;" +
             "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=orclpdb)));";
 
         private const int INIT_CONNECTIONS = 1;
