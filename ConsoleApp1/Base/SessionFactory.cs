@@ -23,7 +23,7 @@ namespace ConsoleApp.Base
  
         public SessionFactory()
         {
-            _status = ConnectionFactory.GetConnection();
+            _status = ConnectionFactory.GetConnection(Constants.ORALCE_FACTORY_PARAM);
             _borrowed = true;
 
             _connection = _status.Connection;

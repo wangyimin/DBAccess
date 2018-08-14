@@ -10,11 +10,19 @@ namespace ConsoleApp.Base
         
         private static ObjectPool<ConnectionStatus> Connections;
 
-        public static ConnectionStatus GetConnection()
+        public static ConnectionStatus GetConnection(string driver)
         {
             if (Connections == null)
             {
-                DbProviderFactory factory = DbProviderFactories.GetFactory(Constants.ORALCE_FACTORY_PARAM);
+                DbProviderFactory factory = null;
+                if (driver.Equals(Constants.ORALCE_FACTORY_PARAM))
+                {
+                    factory = DbProviderFactories.GetFactory(Constants.ORALCE_FACTORY_PARAM);
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupport driver.");
+                }
 
                 Func<ConnectionStatus> creator = () =>
                 {
