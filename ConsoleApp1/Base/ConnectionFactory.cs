@@ -6,11 +6,6 @@ namespace ConsoleApp.Base
 {
     public class ConnectionFactory
     {
-        private const string ORALCE_FACTORY_PARAM = "Oracle.DataAccess.Client";
-        private const string ORACLE_CONNECTION_STRING =
-            "User Id=test;Password=wym509;" +
-            "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=orclpdb)));";
-
         private const int INIT_CONNECTIONS = 1;
         
         private static ObjectPool<ConnectionStatus> Connections;
@@ -19,14 +14,14 @@ namespace ConsoleApp.Base
         {
             if (Connections == null)
             {
-                DbProviderFactory factory = DbProviderFactories.GetFactory(ORALCE_FACTORY_PARAM);
+                DbProviderFactory factory = DbProviderFactories.GetFactory(Constants.ORALCE_FACTORY_PARAM);
 
                 Func<ConnectionStatus> creator = () =>
                 {
                     ConnectionStatus cs = new ConnectionStatus();
                     cs.Connection = factory.CreateConnection();
 
-                    cs.Connection.ConnectionString = ORACLE_CONNECTION_STRING;
+                    cs.Connection.ConnectionString = Constants.ORACLE_CONNECTION_STRING;
                     cs.Connection.Open();
 
                     return cs;

@@ -24,7 +24,6 @@ namespace ConsoleApp.Base
             Direction = direction;
         }
     }
-
     public enum Direction
     {
         Input,

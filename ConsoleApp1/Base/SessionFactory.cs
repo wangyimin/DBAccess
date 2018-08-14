@@ -1,11 +1,10 @@
-﻿using log4net;
+﻿using ConsoleApp.Utils;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
-using Oracle.DataAccess.Client;
-using ConsoleApp.Utils;
 
 namespace ConsoleApp.Base
 {
@@ -13,14 +12,11 @@ namespace ConsoleApp.Base
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(SessionFactory));
 
-        private static readonly string PROC_RET_CD = "r";
-        private static readonly string PROC_RET_MSG = "msg";
-
-
         private ConnectionStatus _status;
         private DbConnection _connection;
         private DbCommand _command;
         private DbTransaction _tx;
+        private IExecProc _proc;
 
         //public static Hashtable SchemaMeta = new Hashtable();
         private bool _borrowed;
@@ -39,6 +35,7 @@ namespace ConsoleApp.Base
             }
 
             _command = _connection.CreateCommand();
+            _proc = ExecProcFactory.GetExecProc(Constants.ORALCE_FACTORY_PARAM);
         }
  
         public virtual DataTable CreateQuery(string sql)
@@ -66,49 +63,9 @@ namespace ConsoleApp.Base
             return dt;
         }
 
-        public virtual void CreateStoredProcedure(string proc, bool IsFunction, params ParameterInfo[] para)
+        public virtual void CreateStoredProcedure(string proc, bool isFunc, params ParameterInfo[] para)
         {
-            logger.Debug(proc);
-
-            OracleCommand cmd = (OracleCommand)_command;
-
-            cmd.CommandText = proc;
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            if (IsFunction)
-            {
-                cmd.Parameters.Add(new OracleParameter(PROC_RET_CD, OracleDbType.Int32)).Direction = ParameterDirection.ReturnValue;
-            }
-
-            foreach (ParameterInfo obj in para)
-            {
-                if (obj.Direction == Direction.Input)
-                {
-                    cmd.Parameters.Add(obj.Name, obj.Value);
-                }
-                else
-                {
-                    cmd.Parameters.Add(obj.Name, ConvertUtils.Convert(obj.DataType), ConvertUtils.Convert(obj.Direction));
-
-                }
-            }
-
-            if (!IsFunction)
-            {
-                cmd.Parameters.Add(new OracleParameter(PROC_RET_CD, OracleDbType.Int32)).Direction = ParameterDirection.Output;
-            }
-
-            cmd.Parameters.Add(new OracleParameter(PROC_RET_MSG, ConvertUtils.Convert(typeof(string)), 256)).Direction = ParameterDirection.Output;
-
-            cmd.ExecuteNonQuery();
-
-            string r = cmd.Parameters[PROC_RET_CD].Value.ToString();
-            
-            if (!"0".Equals(r))
-            {
-                throw new InvalidProgramException("Error [" + cmd.Parameters[PROC_RET_MSG].Value.ToString() + "] occurred in calling stored procedure.");
-            }
-            
+            _proc.ExecProc(_command, proc, isFunc, para);
         }
 
         public virtual List<T> CreateQuery<T>(string sql)
@@ -132,7 +89,6 @@ namespace ConsoleApp.Base
 
             return lst;
         }
- 
 
         public virtual int CreateDDL(string sql)
         {
