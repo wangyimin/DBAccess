@@ -23,7 +23,7 @@ namespace ConsoleApp.Base
  
         public SessionFactory()
         {
-            _status = ConnectionFactory.GetConnection(Constants.ORALCE_FACTORY_PARAM);
+            _status = ConnectionFactory.GetConnection(Constants.ORALCE_DRIVER);
             _borrowed = true;
 
             _connection = _status.Connection;
@@ -35,7 +35,7 @@ namespace ConsoleApp.Base
             }
 
             _command = _connection.CreateCommand();
-            _proc = ExecProcFactory.GetExecProc(Constants.ORALCE_FACTORY_PARAM);
+            _proc = ExecProcFactory.GetExecProc(Constants.ORALCE_DRIVER);
         }
  
         public virtual DataTable CreateQuery(string sql)

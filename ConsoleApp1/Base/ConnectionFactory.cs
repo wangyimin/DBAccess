@@ -15,9 +15,9 @@ namespace ConsoleApp.Base
             if (Connections == null)
             {
                 DbProviderFactory factory = null;
-                if (driver.Equals(Constants.ORALCE_FACTORY_PARAM))
+                if (driver.Equals(Constants.ORALCE_DRIVER))
                 {
-                    factory = DbProviderFactories.GetFactory(Constants.ORALCE_FACTORY_PARAM);
+                    factory = DbProviderFactories.GetFactory(Constants.ORALCE_DRIVER);
                 }
                 else
                 {

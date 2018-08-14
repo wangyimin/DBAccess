@@ -7,7 +7,7 @@ namespace ConsoleApp.Utils
     {
         public static IExecProc GetExecProc(string driver)
         {
-            if (driver.Equals(Constants.ORALCE_FACTORY_PARAM))
+            if (driver.Equals(Constants.ORALCE_DRIVER))
             {
                 return new OracleExecProc();
             }

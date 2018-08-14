@@ -2,7 +2,7 @@
 {
     public class Constants
     {
-        public const string ORALCE_FACTORY_PARAM = "Oracle.DataAccess.Client";
+        public const string ORALCE_DRIVER = "Oracle.DataAccess.Client";
 
         public const string ORACLE_CONNECTION_STRING =
             "User Id=test;Password=test;" +
