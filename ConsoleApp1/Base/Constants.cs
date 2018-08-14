@@ -5,7 +5,7 @@
         public const string ORALCE_FACTORY_PARAM = "Oracle.DataAccess.Client";
 
         public const string ORACLE_CONNECTION_STRING =
-            "User Id=test;Password=wym509;" +
+            "User Id=test;Password=test;" +
             "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=orclpdb)));";
 
 
