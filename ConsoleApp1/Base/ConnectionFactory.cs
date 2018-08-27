@@ -4,15 +4,15 @@ using System.Data.Common;
 
 namespace ConsoleApp.Base
 {
-    public class ConnectionFactory
+    public class ConnectionFactory : IDisposable
     {
         private const int INIT_CONNECTIONS = 1;
         
-        private static ObjectPool<ConnectionStatus> Connections;
+        private static ObjectPool<ConnectionStatus> _pool;
 
-        public static ConnectionStatus GetConnection(string driver)
+        public ConnectionFactory(string driver)
         {
-            if (Connections == null)
+            if (_pool == null)
             {
                 DbProviderFactory factory = null;
                 if (driver.Equals(Constants.ORALCE_DRIVER))
@@ -35,19 +35,27 @@ namespace ConsoleApp.Base
                     return cs;
                 };
 
-                Connections = new ObjectPool<ConnectionStatus>(creator, INIT_CONNECTIONS);
+                _pool = new ObjectPool<ConnectionStatus>(creator, INIT_CONNECTIONS);
             }
-
-            return Connections.Get();
         }
 
-        public static void PutConnection(ConnectionStatus status)
+        public ConnectionStatus GetConnection()
         {
-            Connections.Put(status);
+            return _pool.Borrow();
+        }
+
+        public void PutConnection(ConnectionStatus status)
+        {
+            _pool.Return(status);
+        }
+
+        public void Dispose()
+        {
+            _pool.Clear();
         }
     }
 
-    public class ObjectPool<T>
+    public class ObjectPool<T> where T : IDisposable
     {
         private ConcurrentBag<T> _objects;
         private readonly Func<T> _creator;
@@ -63,20 +71,24 @@ namespace ConsoleApp.Base
             _creator = creator;
 
             // create the specified number of connection objects
-            initialize(num);
+            _initialize(num);
         }
 
-        private void initialize(int num)
+        private void _initialize(int num)
         {
             for (int i = 0; i < num; i++)
             {
-                T el = _creator();
-                _objects.Add(el);
-
+                Add();
             }
         }
 
-        public T Get(bool increment = true)
+        public void Add()
+        {
+            T el = _creator();
+            _objects.Add(el);
+        }
+
+        public T Borrow(bool increment = true)
         {
             T el;
             if (_objects.TryTake(out el))
@@ -93,9 +105,30 @@ namespace ConsoleApp.Base
             throw new InvalidOperationException("No object exists in pool.");
         }
 
-        public void Put(T el)
+        public void Return(T el)
         {
             _objects.Add(el);
+        }
+
+        public int GetPoolSize()
+        {
+            return _objects.Count;
+        }
+
+        public void Remove(T el)
+        {
+            throw new NotSupportedException("Remove is unspported.");
+        }
+
+        public void Clear()
+        {
+            while (!_objects.IsEmpty)
+            {
+                if (_objects.TryTake(out T el))
+                {
+                    el.Dispose();
+                }
+            }
         }
     }
 

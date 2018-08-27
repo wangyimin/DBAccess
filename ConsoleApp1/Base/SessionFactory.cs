@@ -12,6 +12,7 @@ namespace ConsoleApp.Base
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(SessionFactory));
 
+        private ConnectionFactory _factory;
         private ConnectionStatus _status;
         private DbConnection _connection;
         private DbCommand _command;
@@ -23,7 +24,8 @@ namespace ConsoleApp.Base
  
         public SessionFactory()
         {
-            _status = ConnectionFactory.GetConnection(Constants.ORALCE_DRIVER);
+            _factory = new ConnectionFactory(Constants.ORALCE_DRIVER);
+            _status = _factory.GetConnection();
             _borrowed = true;
 
             _connection = _status.Connection;
@@ -120,7 +122,7 @@ namespace ConsoleApp.Base
             //attention: use using block or call this method explicitly to avoid memeory leak
             if (_borrowed)
             {
-                ConnectionFactory.PutConnection(_status);
+                _factory.PutConnection(_status);
                 _borrowed = false;
             }
         } 
