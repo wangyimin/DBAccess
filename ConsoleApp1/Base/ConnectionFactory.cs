@@ -7,17 +7,17 @@ namespace ConsoleApp.Base
     public class ConnectionFactory : IDisposable
     {
         private const int INIT_CONNECTIONS = 1;
-        
+
+        private DbProviderFactory _factory;
         private static ObjectPool<ConnectionStatus> _pool;
 
         public ConnectionFactory(string driver)
         {
             if (_pool == null)
             {
-                DbProviderFactory factory = null;
                 if (driver.Equals(Constants.ORALCE_DRIVER))
                 {
-                    factory = DbProviderFactories.GetFactory(Constants.ORALCE_DRIVER);
+                    _factory = DbProviderFactories.GetFactory(Constants.ORALCE_DRIVER);
                 }
                 else
                 {
@@ -27,7 +27,7 @@ namespace ConsoleApp.Base
                 Func<ConnectionStatus> creator = () =>
                 {
                     ConnectionStatus cs = new ConnectionStatus();
-                    cs.Connection = factory.CreateConnection();
+                    cs.Connection = _factory.CreateConnection();
 
                     cs.Connection.ConnectionString = Constants.ORACLE_CONNECTION_STRING;
                     cs.Connection.Open();
